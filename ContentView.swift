@@ -4,44 +4,48 @@ struct ContentView: View {
 
     @State var userType: UserType = .free
     var musicService: MusicService
+    @State var downloadMusic: DownloadMusicStrategyProtocol = FreeUserDownloadMusicStrategy(musicService: MusicService())
 
     var body: some View {
         VStack {
             Button {
                 userType = .free
-                downloadMusic()
+                setState()
+                downloadMusic.download()
             } label: {
                 Text("Download preview song")
             }.padding()
             
             Button {
                 userType = .paid
-                downloadMusic()
+                setState()
+                downloadMusic.download()
             } label: {
                 Text("Download song")
             }.padding()
             
             Button {
                 userType = .paidSubscription
-                downloadMusic()
+                setState()
+                downloadMusic.download()
             } label: {
                 Text("Download album")
             }.padding()
 
         }.onAppear {
-            downloadMusic()
+            downloadMusic.download()
         }
     }
     
-    func downloadMusic() {
+    func setState() {
         switch userType {
             
         case .free:
-            musicService.downloadPreviewSong()
+            downloadMusic = FreeUserDownloadMusicStrategy(musicService: musicService)
         case .paid:
-            musicService.downloadSong()
+            downloadMusic = PaidUserDownloadMusicStrategy(musicService: musicService)
         case .paidSubscription:
-            musicService.downloadAlbum()
+            downloadMusic = PaidSubscriptionUserMusicDownloadStrategy(musicService: musicService)
         }
     }
 }
